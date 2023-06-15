@@ -6,7 +6,7 @@ from transformers import AutoTokenizer, AutoModel, AutoConfig
 
 class GLM(LLM):
     max_token: int = 2048
-    temperature: float = 0.8
+    temperature: float = 0.2
     top_p: float = 0.9
     tokenizer: object = None
     model: object = None
@@ -29,6 +29,8 @@ class GLM(LLM):
         prompt: str,
         history: List[str] = [],
         stop: Optional[List[str]] = None,
+        temperature: Optional[float] = None,
+        top_p: Optional[float] = None,
     ) -> str:
         if stop is not None:
             raise ValueError("stop kwargs are not permitted.")
@@ -37,8 +39,7 @@ class GLM(LLM):
             prompt, 
             history=history[-self.history_len:] if self.history_len > 0 else [],
             max_length=self.max_token,
-            temperature=self.temperature,
-            top_p=self.top_p,
+            temperature=self.temperature if temperature is None else temperature,
+            top_p=self.top_p if top_p is None else top_p,
         )
         return response
-    

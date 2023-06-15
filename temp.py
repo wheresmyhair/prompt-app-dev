@@ -1,38 +1,28 @@
-from langchain_custom.llm import GLM
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.docstore.document import Document
 from langchain.chains.summarize import load_summarize_chain
-from utils.save_item import save_splited_text
-from langchain.prompts import PromptTemplate
+from langchain.chains import LLMChain
+
+from langchain_custom.staff_report.llm import GLM
+from langchain_custom.staff_report import summarize_prompt, style_trans_prompt
+from utils.text_loader import txt_loader
+
 
 model_path = "C:\\Users\\59700\\Documents\\_Personals_local\\models\\chatglm-6b"
 llm = GLM()
 llm.load_model(model_path=model_path)
-llm(prompt='你好')
 
-with open("./docs/1.txt", encoding='utf-8') as f:
-    personal_report = f.read()
-    
-text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=10)
-splited_text = text_splitter.split_text(personal_report)
-save_splited_text(splited_text, "./docs/1_splited.txt")
 
-docs = [Document(page_content=x) for x in splited_text]
+docs = txt_loader("./docs/3.txt", chunk_size=500)
 
-prompt_template = """对下面的个人述职报告做精简的摘要：
 
-    {report_content}
-    
-"""
-
-PROMPT = PromptTemplate(template=prompt_template, input_variables=["report_content"])
-
-chain = load_summarize_chain(
+chain_summ = load_summarize_chain(
     llm, 
     chain_type="map_reduce", 
     return_intermediate_steps=True, 
-    map_prompt=PROMPT, 
-    combine_prompt=PROMPT
+    map_prompt=summarize_prompt.PROMPT,
+    combine_prompt=summarize_prompt.PROMPT,
 )
+chain_styletrans = LLMChain(llm=llm, prompt=style_trans_prompt.PROMPT)
 
-summ = chain({"input_documents": docs}, return_only_outputs=True)
+
+summ = chain_summ({"input_documents": docs}, return_only_outputs=True)
+output = chain_styletrans.run(text=summ['output_text'])
