@@ -6,12 +6,12 @@ from langchain_custom.staff_report import summarize_prompt, style_trans_prompt
 from utils.text_loader import txt_loader
 
 
-model_path = "C:\\Users\\59700\\Documents\\_Personals_local\\models\\chatglm-6b"
+model_path = "C:\\Users\\59700\\Documents\\_Personals_local\\models\\chatglm2-6b"
 llm = GLM()
 llm.load_model(model_path=model_path)
 
 
-docs = txt_loader("./docs/3.txt", chunk_size=500)
+docs = txt_loader("./docs/3.txt", chunk_size=1000)
 
 
 chain_summ = load_summarize_chain(
