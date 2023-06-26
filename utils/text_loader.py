@@ -13,3 +13,7 @@ def txt_loader(file, chunk_size=1000, chunk_overlap=10, save_splited=None):
     return [Document(page_content=x) for x in splited_text]
 
 
+def str_loader(text, chunk_size=1000, chunk_overlap=10):
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    splited_text = text_splitter.split_text(text)
+    return [Document(page_content=x) for x in splited_text]
