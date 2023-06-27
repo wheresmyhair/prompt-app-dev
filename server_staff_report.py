@@ -12,9 +12,8 @@ from langchain_custom.staff_report.llm import GLM
 from langchain_custom.staff_report import summarize_prompt, style_trans_prompt
 
 
-model_path = "C:\\Users\\59700\\Documents\\_Personals_local\\models\\chatglm2-6b"
 llm = GLM()
-llm.load_model(model_path=model_path)
+llm.load_model(model_path=cfg.MODEL_PATH)
 
 
 def clear_content():
