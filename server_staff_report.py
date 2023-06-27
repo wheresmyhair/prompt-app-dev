@@ -1,28 +1,20 @@
-import gradio as gr
 import docx
+import time
+import json
+import gradio as gr
+import config as cfg
+from os.path import join, basename
 from utils.sysfunc import get_app_version, get_model_version, record_init, parse_text
 from utils.text_loader import str_loader
-from os.path import join, basename
-import time
+from utils.save_item import save_docx_from_str
 from langchain.chains.summarize import load_summarize_chain
-import json
 from langchain_custom.staff_report.llm import GLM
-import config as cfg
-from langchain.chains import LLMChain
 from langchain_custom.staff_report import summarize_prompt, style_trans_prompt
-
 
 
 model_path = "C:\\Users\\59700\\Documents\\_Personals_local\\models\\chatglm2-6b"
 llm = GLM()
 llm.load_model(model_path=model_path)
-
-
-# # Override Textbox.postprocess
-# def postprocess(self, y):
-#     import mdtex2html
-#     return None if y is None else mdtex2html.convert(y)
-# gr.components.Textbox.postprocess = postprocess
 
 
 def clear_content():
@@ -53,8 +45,8 @@ def button_action_submit_main_0(progress=gr.Progress(track_tqdm=True)):
     summ = summ['output_text'].replace('\n', '')
     print('[summary]: ', summ)
     cookies.value['doc_summary'].append((time.strftime("%Y%m%d_%H%M%S", time.localtime()),summ))
-    
-    
+
+
 def button_action_submit_main_1(area_text, history, past_key_values, max_length=8192, top_p=0.8, temperature=0.95):
     content = cookies.value['doc_summary'][-1][1]
     model_input = style_trans_prompt.PROMPT.format(text=content)
@@ -67,8 +59,8 @@ def button_action_submit_main_1(area_text, history, past_key_values, max_length=
         area_text = response
         yield area_text, history, past_key_values
     cookies.value['final_report'].append((time.strftime("%Y%m%d_%H%M%S", time.localtime()), response))
-        
-        
+
+
 def button_action_submit_post():
     return {button_retry: gr.update(visible=True),
             button_flag: gr.update(visible=True),
@@ -82,9 +74,7 @@ def button_action_retry_pre():
 
 
 def button_action_save():
-    doc = docx.Document()
-    doc.add_paragraph(cookies.value['final_report'][-1][1])
-    doc.save(cookies.value['dir_docx_generated'])
+    save_docx_from_str(cookies.value['final_report'][-1][1], cookies.value['dir_docx_generated'])
     json.dump(cookies.value, open(cookies.value['dir']+'\\cookies.json', 'w', encoding='utf-8'), ensure_ascii=False)
     return {area_download: gr.update(visible=True),
             output_file: gr.update(value=cookies.value['dir_docx_generated']),
