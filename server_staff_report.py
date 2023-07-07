@@ -17,7 +17,9 @@ llm.load_model(model_path=cfg.MODEL_PATH)
 
 
 def clear_content():
-    return gr.update(value=None)
+    return {area_input: gr.update(value=None),
+            button_flag: gr.update(visible=False),
+            button_retry: gr.update(visible=False)}
 
 
 def button_action_submit_pre(doc_file):
@@ -29,7 +31,9 @@ def button_action_submit_pre(doc_file):
     for para in doc.paragraphs:
         text += para.text
     cookies.value.update({'doc_content': text})
-    return {output_doc_content: gr.update(value=cookies.value['doc_content']),}
+    return {output_doc_content: gr.update(value=cookies.value['doc_content']),
+            button_flag: gr.update(visible=False),
+            button_retry: gr.update(visible=False)}
     
     
 def button_action_submit_main_0(progress=gr.Progress(track_tqdm=True)):
@@ -86,7 +90,9 @@ gr_row = lambda: gr.Row()
 gr_col = lambda scale: gr.Column(scale=scale)
 
 
-with gr.Blocks(title="考察报告生成", analytics_enabled=False) as demo:
+with gr.Blocks(title="考察报告生成",
+               analytics_enabled=False, 
+               css="footer{visibility:hidden}",) as demo:
     # init
     gr.HTML(f"<h1 align=\"center\">考察报告生成 {get_app_version()}</h1>")
     cookies = gr.State({'access_time_abs':None,
@@ -138,7 +144,7 @@ with gr.Blocks(title="考察报告生成", analytics_enabled=False) as demo:
     # button actions
     button_submit.click(fn=button_action_submit_pre,
                         inputs=[input_file],
-                        outputs=[output_doc_content],
+                        outputs=[output_doc_content, button_flag, button_retry],
                         show_progress=True).success(fn=button_action_submit_main_0, 
                                                     inputs=None,
                                                     outputs=[output_doc_generate],
@@ -150,7 +156,7 @@ with gr.Blocks(title="考察报告生成", analytics_enabled=False) as demo:
                                                                                                             outputs=[button_flag, button_retry, area_download, output_file],
                                                                                                             show_progress=False)
 
-    button_clear.click(fn=clear_content, inputs=None, outputs=input_file)
+    button_clear.click(fn=clear_content, inputs=None, outputs=[input_file, button_flag, button_retry])
 
     button_flag.click(fn=button_action_save,
                       inputs=None,
@@ -173,7 +179,8 @@ with gr.Blocks(title="考察报告生成", analytics_enabled=False) as demo:
 
 if __name__ == '__main__':
     demo.queue().launch(
+        show_api=False,
         server_name='0.0.0.0',
         server_port=7800,
-        inbrowser=False,
+        inbrowser=True,
     )
