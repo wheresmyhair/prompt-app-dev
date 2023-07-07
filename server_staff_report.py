@@ -23,6 +23,7 @@ def clear_content():
 def button_action_submit_pre(doc_file):
     record_init(cookies)
     doc = docx.Document(doc_file.name)
+    print(doc_file.name)
     doc.save(join(cookies.value['dir'], basename(doc_file.name)))
     text = ""
     for para in doc.paragraphs:
@@ -174,5 +175,5 @@ if __name__ == '__main__':
     demo.queue().launch(
         server_name='0.0.0.0',
         server_port=7800,
-        inbrowser=True,
+        inbrowser=False,
     )
